@@ -22,21 +22,21 @@
     </script>
     <style>
         .glass-card {
-            background: rgba(15, 23, 42, 0.7);
+            background: rgba(15, 23, 42, 0.75);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
             border: 1px solid rgba(255, 255, 255, 0.08);
         }
         .glass-card:hover {
-            border-color: rgba(99, 102, 241, 0.4);
-            box-shadow: 0 0 25px -5px rgba(99, 102, 241, 0.25);
-        }
-        .glow-bg {
-            background: radial-gradient(circle at 50% 0%, rgba(99, 102, 241, 0.15) 0%, rgba(168, 85, 247, 0.05) 50%, transparent 100%);
+            border-color: rgba(99, 102, 241, 0.5);
+            box-shadow: 0 0 30px -5px rgba(99, 102, 241, 0.3);
         }
     </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans selection:bg-indigo-500 selection:text-white glow-bg">
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans selection:bg-indigo-500 selection:text-white relative overflow-x-hidden">
+
+    <!-- Interactive Cursor Background Canvas -->
+    <canvas id="bgCanvas" class="fixed inset-0 pointer-events-none z-0"></canvas>
 
     <!-- Navigation Bar -->
     <nav class="sticky top-0 z-40 border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-xl">
@@ -61,175 +61,184 @@
         </div>
     </nav>
 
-    <!-- Hero Section -->
-    <header class="relative overflow-hidden pt-20 pb-16">
-        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[350px] bg-gradient-to-tr from-indigo-600/20 via-purple-600/20 to-pink-600/10 blur-[120px] rounded-full pointer-events-none"></div>
+    <!-- Content Wrapper (z-10 ensures it stays clickable above canvas) -->
+    <div class="relative z-10 flex-1 flex flex-col">
         
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-            <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-900 border border-indigo-500/30 text-xs font-semibold text-indigo-300 mb-6 shadow-inner">
-                <span class="w-2 h-2 rounded-full bg-indigo-400 animate-pulse"></span>
-                Academic Year 2026
-            </div>
-            
-            <h1 class="text-4xl sm:text-6xl font-extrabold tracking-tight text-white max-w-4xl mx-auto leading-tight sm:leading-tight">
-                Future-Ready Learning for <br class="hidden sm:block"/>
-                <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400">Pre-Ninth Class</span>
-            </h1>
-            
-            <p class="mt-6 max-w-2xl mx-auto text-slate-400 text-base sm:text-lg">
-                High-speed access to official curriculum books. Read online seamlessly with our embedded viewer or download directly.
-            </p>
-
-            <!-- Instant Search Bar -->
-            <div class="mt-10 max-w-md mx-auto relative">
-                <input type="text" id="searchInput" onkeyup="filterBooks()" placeholder="Search subjects (e.g. Math, Physics)..." 
-                       class="w-full bg-slate-900/90 border border-slate-800 rounded-2xl py-3.5 pl-12 pr-4 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500/80 focus:ring-2 focus:ring-indigo-500/20 transition text-sm shadow-xl">
-                <svg class="w-5 h-5 text-slate-500 absolute left-4 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                </svg>
-            </div>
-
-            <!-- Quick Stats -->
-            <div class="mt-12 grid grid-cols-3 max-w-lg mx-auto gap-4 py-4 px-6 rounded-2xl bg-slate-900/40 border border-slate-800/60 backdrop-blur-sm text-center">
-                <div>
-                    <div class="text-xl font-bold text-white">6</div>
-                    <div class="text-xs text-slate-400">Core Subjects</div>
+        <!-- Hero Section -->
+        <header class="relative pt-20 pb-16">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+                <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-900/90 border border-indigo-500/30 text-xs font-semibold text-indigo-300 mb-6 shadow-inner backdrop-blur-md">
+                    <span class="w-2 h-2 rounded-full bg-indigo-400 animate-pulse"></span>
+                    Academic Year 2026
                 </div>
-                <div>
-                    <div class="text-xl font-bold text-indigo-400">100%</div>
-                    <div class="text-xs text-slate-400">Free Access</div>
-                </div>
-                <div>
-                    <div class="text-xl font-bold text-purple-400">Instant</div>
-                    <div class="text-xs text-slate-400">PDF Reader</div>
-                </div>
-            </div>
-        </div>
-    </header>
-
-    <!-- Subjects Grid Section -->
-    <main id="subjects" class="py-12 flex-1">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            
-            <div id="noResults" class="hidden text-center py-12 text-slate-400">
-                No matching subjects found.
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" id="booksContainer">
                 
-                <!-- Mathematics -->
-                <div class="subject-card glass-card rounded-2xl p-6 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 group" data-title="Mathematics Math">
-                    <div>
-                        <div class="flex items-center justify-between mb-4">
-                            <div class="w-12 h-12 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-2xl text-indigo-400 font-bold group-hover:scale-110 group-hover:border-indigo-500/50 transition-all">
-                                ∑
-                            </div>
-                            <span class="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">Core Science</span>
-                        </div>
-                        <h3 class="text-xl font-bold text-white group-hover:text-indigo-300 transition-colors">Mathematics</h3>
-                        <p class="mt-2 text-sm text-slate-400 leading-relaxed">Algebra, geometry, matrices, and essential analytical concepts.</p>
-                    </div>
-                    <button onclick="openReader('Mathematics', 'math.pdf')" class="mt-6 w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm transition shadow-lg shadow-indigo-600/25 flex items-center justify-center gap-2">
-                        <span>Read Book</span>
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-                    </button>
+                <h1 class="text-4xl sm:text-6xl font-extrabold tracking-tight text-white max-w-4xl mx-auto leading-tight sm:leading-tight">
+                    Future-Ready Learning for <br class="hidden sm:block"/>
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400">Pre-Ninth Class</span>
+                </h1>
+                
+                <p class="mt-6 max-w-2xl mx-auto text-slate-400 text-base sm:text-lg">
+                    High-speed access to official curriculum books. Move your cursor to interact with the environment.
+                </p>
+
+                <!-- Instant Search Bar -->
+                <div class="mt-10 max-w-md mx-auto relative">
+                    <input type="text" id="searchInput" onkeyup="filterBooks()" placeholder="Search subjects (e.g. Math, Physics)..." 
+                           class="w-full bg-slate-900/90 border border-slate-800 rounded-2xl py-3.5 pl-12 pr-4 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500/80 focus:ring-2 focus:ring-indigo-500/20 transition text-sm shadow-xl backdrop-blur-md">
+                    <svg class="w-5 h-5 text-slate-500 absolute left-4 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
                 </div>
 
-                <!-- Physics -->
-                <div class="subject-card glass-card rounded-2xl p-6 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 group" data-title="Physics">
+                <!-- Quick Stats -->
+                <div class="mt-12 grid grid-cols-3 max-w-lg mx-auto gap-4 py-4 px-6 rounded-2xl bg-slate-900/60 border border-slate-800/80 backdrop-blur-md text-center">
                     <div>
-                        <div class="flex items-center justify-between mb-4">
-                            <div class="w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-2xl text-cyan-400 group-hover:scale-110 group-hover:border-cyan-500/50 transition-all">
-                                ⚡
-                            </div>
-                            <span class="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">Core Science</span>
-                        </div>
-                        <h3 class="text-xl font-bold text-white group-hover:text-cyan-300 transition-colors">Physics</h3>
-                        <p class="mt-2 text-sm text-slate-400 leading-relaxed">Physical quantities, kinematics, dynamics, and energy fundamentals.</p>
+                        <div class="text-xl font-bold text-white">6</div>
+                        <div class="text-xs text-slate-400">Core Subjects</div>
                     </div>
-                    <button onclick="openReader('Physics', 'physics.pdf')" class="mt-6 w-full py-3 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-semibold text-sm transition shadow-lg shadow-cyan-600/25 flex items-center justify-center gap-2">
-                        <span>Read Book</span>
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-                    </button>
-                </div>
-
-                <!-- Chemistry -->
-                <div class="subject-card glass-card rounded-2xl p-6 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 group" data-title="Chemistry">
                     <div>
-                        <div class="flex items-center justify-between mb-4">
-                            <div class="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-2xl text-amber-400 group-hover:scale-110 group-hover:border-amber-500/50 transition-all">
-                                ⚗️
-                            </div>
-                            <span class="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/20">Core Science</span>
-                        </div>
-                        <h3 class="text-xl font-bold text-white group-hover:text-amber-300 transition-colors">Chemistry</h3>
-                        <p class="mt-2 text-sm text-slate-400 leading-relaxed">Atomic structure, chemical bonding, and periodic tables.</p>
+                        <div class="text-xl font-bold text-indigo-400">100%</div>
+                        <div class="text-xs text-slate-400">Free Access</div>
                     </div>
-                    <button onclick="openReader('Chemistry', 'chemistry.pdf')" class="mt-6 w-full py-3 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-semibold text-sm transition shadow-lg shadow-amber-600/25 flex items-center justify-center gap-2">
-                        <span>Read Book</span>
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-                    </button>
-                </div>
-
-                <!-- Biology -->
-                <div class="subject-card glass-card rounded-2xl p-6 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 group" data-title="Biology Bio">
                     <div>
-                        <div class="flex items-center justify-between mb-4">
-                            <div class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-2xl text-emerald-400 group-hover:scale-110 group-hover:border-emerald-500/50 transition-all">
-                                🧬
-                            </div>
-                            <span class="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">Core Science</span>
-                        </div>
-                        <h3 class="text-xl font-bold text-white group-hover:text-emerald-300 transition-colors">Biology</h3>
-                        <p class="mt-2 text-sm text-slate-400 leading-relaxed">Cell biology, biodiversity, enzymes, and bioenergetics.</p>
+                        <div class="text-xl font-bold text-purple-400">Instant</div>
+                        <div class="text-xs text-slate-400">PDF Reader</div>
                     </div>
-                    <button onclick="openReader('Biology', 'biology.pdf')" class="mt-6 w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-sm transition shadow-lg shadow-emerald-600/25 flex items-center justify-center gap-2">
-                        <span>Read Book</span>
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-                    </button>
                 </div>
-
-                <!-- English -->
-                <div class="subject-card glass-card rounded-2xl p-6 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 group" data-title="English">
-                    <div>
-                        <div class="flex items-center justify-between mb-4">
-                            <div class="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-2xl text-purple-400 group-hover:scale-110 group-hover:border-purple-500/50 transition-all">
-                                📚
-                            </div>
-                            <span class="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-purple-500/10 text-purple-300 border border-purple-500/20">Humanities</span>
-                        </div>
-                        <h3 class="text-xl font-bold text-white group-hover:text-purple-300 transition-colors">English</h3>
-                        <p class="mt-2 text-sm text-slate-400 leading-relaxed">Comprehensive grammar, vocabulary building, and literature lessons.</p>
-                    </div>
-                    <button onclick="openReader('English', 'english.pdf')" class="mt-6 w-full py-3 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-semibold text-sm transition shadow-lg shadow-purple-600/25 flex items-center justify-center gap-2">
-                        <span>Read Book</span>
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-                    </button>
-                </div>
-
-                <!-- Urdu -->
-                <div class="subject-card glass-card rounded-2xl p-6 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 group" data-title="Urdu">
-                    <div>
-                        <div class="flex items-center justify-between mb-4">
-                            <div class="w-12 h-12 rounded-xl bg-pink-500/10 border border-pink-500/20 flex items-center justify-center text-2xl text-pink-400 group-hover:scale-110 group-hover:border-pink-500/50 transition-all">
-                                ✍️
-                            </div>
-                            <span class="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-pink-500/10 text-pink-300 border border-pink-500/20">Humanities</span>
-                        </div>
-                        <h3 class="text-xl font-bold text-white group-hover:text-pink-300 transition-colors">Urdu</h3>
-                        <p class="mt-2 text-sm text-slate-400 leading-relaxed">Classical literature, prose, poetry, and foundational writing skills.</p>
-                    </div>
-                    <button onclick="openReader('Urdu', 'urdu.pdf')" class="mt-6 w-full py-3 rounded-xl bg-pink-600 hover:bg-pink-500 text-white font-semibold text-sm transition shadow-lg shadow-pink-600/25 flex items-center justify-center gap-2">
-                        <span>Read Book</span>
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-                    </button>
-                </div>
-
             </div>
-        </div>
-    </main>
+        </header>
 
-    <!-- Futuristic Modal -->
+        <!-- Subjects Grid Section -->
+        <main id="subjects" class="py-12 flex-1">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                
+                <div id="noResults" class="hidden text-center py-12 text-slate-400">
+                    No matching subjects found.
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" id="booksContainer">
+                    
+                    <!-- Mathematics -->
+                    <div class="subject-card glass-card rounded-2xl p-6 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 group" data-title="Mathematics Math">
+                        <div>
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-12 h-12 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-2xl text-indigo-400 font-bold group-hover:scale-110 group-hover:border-indigo-500/50 transition-all">
+                                    ∑
+                                </div>
+                                <span class="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">Core Science</span>
+                            </div>
+                            <h3 class="text-xl font-bold text-white group-hover:text-indigo-300 transition-colors">Mathematics</h3>
+                            <p class="mt-2 text-sm text-slate-400 leading-relaxed">Algebra, geometry, matrices, and essential analytical concepts.</p>
+                        </div>
+                        <button onclick="openReader('Mathematics', 'math.pdf')" class="mt-6 w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm transition shadow-lg shadow-indigo-600/25 flex items-center justify-center gap-2">
+                            <span>Read Book</span>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                        </button>
+                    </div>
+
+                    <!-- Physics -->
+                    <div class="subject-card glass-card rounded-2xl p-6 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 group" data-title="Physics">
+                        <div>
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-2xl text-cyan-400 group-hover:scale-110 group-hover:border-cyan-500/50 transition-all">
+                                    ⚡
+                                </div>
+                                <span class="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">Core Science</span>
+                            </div>
+                            <h3 class="text-xl font-bold text-white group-hover:text-cyan-300 transition-colors">Physics</h3>
+                            <p class="mt-2 text-sm text-slate-400 leading-relaxed">Physical quantities, kinematics, dynamics, and energy fundamentals.</p>
+                        </div>
+                        <button onclick="openReader('Physics', 'physics.pdf')" class="mt-6 w-full py-3 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-semibold text-sm transition shadow-lg shadow-cyan-600/25 flex items-center justify-center gap-2">
+                            <span>Read Book</span>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                        </button>
+                    </div>
+
+                    <!-- Chemistry -->
+                    <div class="subject-card glass-card rounded-2xl p-6 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 group" data-title="Chemistry">
+                        <div>
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-2xl text-amber-400 group-hover:scale-110 group-hover:border-amber-500/50 transition-all">
+                                    ⚗️
+                                </div>
+                                <span class="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/20">Core Science</span>
+                            </div>
+                            <h3 class="text-xl font-bold text-white group-hover:text-amber-300 transition-colors">Chemistry</h3>
+                            <p class="mt-2 text-sm text-slate-400 leading-relaxed">Atomic structure, chemical bonding, and periodic tables.</p>
+                        </div>
+                        <button onclick="openReader('Chemistry', 'chemistry.pdf')" class="mt-6 w-full py-3 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-semibold text-sm transition shadow-lg shadow-amber-600/25 flex items-center justify-center gap-2">
+                            <span>Read Book</span>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                        </button>
+                    </div>
+
+                    <!-- Biology -->
+                    <div class="subject-card glass-card rounded-2xl p-6 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 group" data-title="Biology Bio">
+                        <div>
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-2xl text-emerald-400 group-hover:scale-110 group-hover:border-emerald-500/50 transition-all">
+                                    🧬
+                                </div>
+                                <span class="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">Core Science</span>
+                            </div>
+                            <h3 class="text-xl font-bold text-white group-hover:text-emerald-300 transition-colors">Biology</h3>
+                            <p class="mt-2 text-sm text-slate-400 leading-relaxed">Cell biology, biodiversity, enzymes, and bioenergetics.</p>
+                        </div>
+                        <button onclick="openReader('Biology', 'biology.pdf')" class="mt-6 w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-sm transition shadow-lg shadow-emerald-600/25 flex items-center justify-center gap-2">
+                            <span>Read Book</span>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                        </button>
+                    </div>
+
+                    <!-- English -->
+                    <div class="subject-card glass-card rounded-2xl p-6 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 group" data-title="English">
+                        <div>
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-2xl text-purple-400 group-hover:scale-110 group-hover:border-purple-500/50 transition-all">
+                                    📚
+                                </div>
+                                <span class="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-purple-500/10 text-purple-300 border border-purple-500/20">Humanities</span>
+                            </div>
+                            <h3 class="text-xl font-bold text-white group-hover:text-purple-300 transition-colors">English</h3>
+                            <p class="mt-2 text-sm text-slate-400 leading-relaxed">Comprehensive grammar, vocabulary building, and literature lessons.</p>
+                        </div>
+                        <button onclick="openReader('English', 'english.pdf')" class="mt-6 w-full py-3 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-semibold text-sm transition shadow-lg shadow-purple-600/25 flex items-center justify-center gap-2">
+                            <span>Read Book</span>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                        </button>
+                    </div>
+
+                    <!-- Urdu -->
+                    <div class="subject-card glass-card rounded-2xl p-6 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 group" data-title="Urdu">
+                        <div>
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-12 h-12 rounded-xl bg-pink-500/10 border border-pink-500/20 flex items-center justify-center text-2xl text-pink-400 group-hover:scale-110 group-hover:border-pink-500/50 transition-all">
+                                    ✍️
+                                </div>
+                                <span class="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-pink-500/10 text-pink-300 border border-pink-500/20">Humanities</span>
+                            </div>
+                            <h3 class="text-xl font-bold text-white group-hover:text-pink-300 transition-colors">Urdu</h3>
+                            <p class="mt-2 text-sm text-slate-400 leading-relaxed">Classical literature, prose, poetry, and foundational writing skills.</p>
+                        </div>
+                        <button onclick="openReader('Urdu', 'urdu.pdf')" class="mt-6 w-full py-3 rounded-xl bg-pink-600 hover:bg-pink-500 text-white font-semibold text-sm transition shadow-lg shadow-pink-600/25 flex items-center justify-center gap-2">
+                            <span>Read Book</span>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="border-t border-slate-800/80 bg-slate-950/60 py-8">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-xs text-slate-500">
+                © 2026 Pre9th Books Hub. Built for fast, modern academic access.
+            </div>
+        </footer>
+    </div>
+
+    <!-- Futuristic Modal Viewer -->
     <div id="readerModal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 hidden flex-col transition-all duration-300 p-2 sm:p-6">
         <div class="w-full max-w-6xl mx-auto h-full flex flex-col rounded-2xl bg-slate-900 border border-slate-800 shadow-2xl overflow-hidden">
             <!-- Modal Header -->
@@ -255,15 +264,121 @@
         </div>
     </div>
 
-    <!-- Footer -->
-    <footer class="border-t border-slate-800/80 bg-slate-950/60 py-8">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-xs text-slate-500">
-            © 2026 Pre9th Books Hub. Built for fast, modern academic access.
-        </div>
-    </footer>
-
-    <!-- JavaScript Logic -->
+    <!-- JavaScript Engine -->
     <script>
+        // --- 1. Interactive Cursor Canvas Script ---
+        const canvas = document.getElementById('bgCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let width, height;
+        let particles = [];
+        let mouse = { x: null, y: null, radius: 170 };
+
+        function resizeCanvas() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        window.addEventListener('mousemove', (e) => {
+            mouse.x = e.clientX;
+            mouse.y = e.clientY;
+        });
+
+        window.addEventListener('mouseleave', () => {
+            mouse.x = null;
+            mouse.y = null;
+        });
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.vx = (Math.random() - 0.5) * 0.8;
+                this.vy = (Math.random() - 0.5) * 0.8;
+                this.size = Math.random() * 2 + 1;
+                this.baseAlpha = Math.random() * 0.4 + 0.2;
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+
+                if (this.x < 0 || this.x > width) this.vx *= -1;
+                if (this.y < 0 || this.y > height) this.vy *= -1;
+
+                // Repel effect when cursor comes close
+                if (mouse.x !== null && mouse.y !== null) {
+                    let dx = mouse.x - this.x;
+                    let dy = mouse.y - this.y;
+                    let dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < mouse.radius) {
+                        let force = (mouse.radius - dist) / mouse.radius;
+                        let angle = Math.atan2(dy, dx);
+                        this.x -= Math.cos(angle) * force * 3;
+                        this.y -= Math.sin(angle) * force * 3;
+                    }
+                }
+            }
+
+            draw() {
+                ctx.fillStyle = `rgba(129, 140, 248, ${this.baseAlpha})`;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        // Initialize particles dynamically based on screen size
+        const particleCount = Math.min(Math.floor(window.innerWidth / 14), 90);
+        for (let i = 0; i < particleCount; i++) {
+            particles.push(new Particle());
+        }
+
+        function animateCanvas() {
+            ctx.clearRect(0, 0, width, height);
+
+            for (let i = 0; i < particles.length; i++) {
+                particles[i].update();
+                particles[i].draw();
+
+                // Connect particles to each other
+                for (let j = i + 1; j < particles.length; j++) {
+                    let dx = particles[i].x - particles[j].x;
+                    let dy = particles[i].y - particles[j].y;
+                    let dist = Math.sqrt(dx * dx + dy * dy);
+
+                    if (dist < 110) {
+                        ctx.strokeStyle = `rgba(168, 85, 247, ${0.2 * (1 - dist / 110)})`;
+                        ctx.lineWidth = 0.8;
+                        ctx.beginPath();
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.stroke();
+                    }
+                }
+
+                // Draw glowing lasers to the mouse cursor
+                if (mouse.x !== null && mouse.y !== null) {
+                    let dx = particles[i].x - mouse.x;
+                    let dy = particles[i].y - mouse.y;
+                    let dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < mouse.radius) {
+                        ctx.strokeStyle = `rgba(99, 102, 241, ${0.45 * (1 - dist / mouse.radius)})`;
+                        ctx.lineWidth = 1;
+                        ctx.beginPath();
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(mouse.x, mouse.y);
+                        ctx.stroke();
+                    }
+                }
+            }
+            requestAnimationFrame(animateCanvas);
+        }
+        animateCanvas();
+
+        // --- 2. Live Search & Modal Script ---
         function filterBooks() {
             const query = document.getElementById('searchInput').value.toLowerCase();
             const cards = document.querySelectorAll('.subject-card');
