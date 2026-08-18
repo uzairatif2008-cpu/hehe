@@ -56,7 +56,7 @@
                         <h3 class="text-xl font-bold text-slate-900">Mathematics</h3>
                         <p class="mt-2 text-sm text-slate-500">Algebra, Geometry, and essential mathematical foundations.</p>
                     </div>
-                    <button onclick="openReader('Mathematics', 'books/math.pdf')" class="mt-6 w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-xl transition">
+                    <button onclick="openReader('Mathematics', 'math.pdf')" class="mt-6 w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-xl transition">
                         Read Book →
                     </button>
                 </div>
@@ -68,7 +68,7 @@
                         <h3 class="text-xl font-bold text-slate-900">Physics</h3>
                         <p class="mt-2 text-sm text-slate-500">Measurements, kinematics, vectors, and basic physical forces.</p>
                     </div>
-                    <button onclick="openReader('Physics', 'books/physics.pdf')" class="mt-6 w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-xl transition">
+                    <button onclick="openReader('Physics', 'physics.pdf')" class="mt-6 w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-xl transition">
                         Read Book →
                     </button>
                 </div>
@@ -80,7 +80,7 @@
                         <h3 class="text-xl font-bold text-slate-900">Chemistry</h3>
                         <p class="mt-2 text-sm text-slate-500">Elements, periodic table fundamentals, and basic equations.</p>
                     </div>
-                    <button onclick="openReader('Chemistry', 'books/chemistry.pdf')" class="mt-6 w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-xl transition">
+                    <button onclick="openReader('Chemistry', 'chemistry.pdf')" class="mt-6 w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-xl transition">
                         Read Book →
                     </button>
                 </div>
@@ -92,7 +92,7 @@
                         <h3 class="text-xl font-bold text-slate-900">Biology</h3>
                         <p class="mt-2 text-sm text-slate-500">Cell structure, biodiversity, and life process fundamentals.</p>
                     </div>
-                    <button onclick="openReader('Biology', 'books/biology.pdf')" class="mt-6 w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-xl transition">
+                    <button onclick="openReader('Biology', 'biology.pdf')" class="mt-6 w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-xl transition">
                         Read Book →
                     </button>
                 </div>
@@ -104,7 +104,7 @@
                         <h3 class="text-xl font-bold text-slate-900">English</h3>
                         <p class="mt-2 text-sm text-slate-500">Grammar rules, vocabulary units, and comprehension passages.</p>
                     </div>
-                    <button onclick="openReader('English', 'books/english.pdf')" class="mt-6 w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-xl transition">
+                    <button onclick="openReader('English', 'english.pdf')" class="mt-6 w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-xl transition">
                         Read Book →
                     </button>
                 </div>
@@ -116,7 +116,7 @@
                         <h3 class="text-xl font-bold text-slate-900">Urdu</h3>
                         <p class="mt-2 text-sm text-slate-500">Grammar, essays, and introductory literature content.</p>
                     </div>
-                    <button onclick="openReader('Urdu', 'books/urdu.pdf')" class="mt-6 w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-xl transition">
+                    <button onclick="openReader('Urdu', 'urdu.pdf')" class="mt-6 w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-xl transition">
                         Read Book →
                     </button>
                 </div>
@@ -155,15 +155,15 @@
             const modal = document.getElementById('readerModal');
             modal.classList.remove('hidden');
             modal.classList.add('flex');
-            document.body.style.overflow = 'hidden'; // Stop background scrolling
+            document.body.style.overflow = 'hidden';
         }
 
         function closeReader() {
             const modal = document.getElementById('readerModal');
             modal.classList.add('hidden');
             modal.classList.remove('flex');
-            document.getElementById('pdfViewer').src = ''; // Clear source to stop loading
-            document.body.style.overflow = 'auto'; // Restore scrolling
+            document.getElementById('pdfViewer').src = '';
+            document.body.style.overflow = 'auto';
         }
     </script>
 </body>
